@@ -21,13 +21,14 @@ pause_file = BASE / "pauseTimes.txt"
 bot_file = BASE / "discord_deadlock_bot.py"
 raspberry_update_name="deadlock_bot_update"
 
+with open(restart_file,"w") as f:
+    f.write("1")
+
 pauseStart=4
 pauseEnd=12
 
 def update():
-    print("update",flush=True)
     def copy_contents(scr,dest):
-        print("copying content",flush=True)
         for item in scr.iterdir():
             target=dest / item.name
             if item.is_dir():
@@ -37,7 +38,6 @@ def update():
             else:
                 shutil.copy2(item,target)
     def find_update_folder():
-        print("finding folder",flush=True)
         paths=[
             Path("/media"),
             Path("/mnt"),
@@ -51,13 +51,11 @@ def update():
                     return Path(root) / raspberry_update_name
         return None
     path=find_update_folder()
-    print("folder: ",path,flush=True)
     if path:
         try:
             copy_contents(path,Path(__file__).resolve().parent)
         except Exception as e:
             print(f"Update error {e}",flush=True)
-    print("update done",flush=True)
 
 while True:
     if process is None or process.poll() is not None:
@@ -67,20 +65,26 @@ while True:
         with open(restart_file,"r") as f:
             shouldrestart=int(f.readline().strip())
         if shouldrestart==2 and pauseStart<=datetime.now(ZoneInfo("Europe/Berlin")).hour<=pauseEnd:
-            time.sleep(1*60*60) #1 hour
+            time.sleep(1*60) #1 minute
         else:
+            try:
+                lindistr=platform.freedesktop_os_release()
+            except:
+                lindistr=None
+            
             if shouldrestart:
                 with open(hotboot_file,"w") as f:
                     f.write(str(fromrestart))
-                if platform.freedesktop_os_release()==None:
+                
+                if lindistr==None:
                     process = subprocess.Popen(["python", bot_file])
                 else:
-                    print("a",flush=True)
                     update()
                     process = subprocess.Popen(["python3", bot_file])
+
                 fromrestart=1
             else:
-                if platform.freedesktop_os_release()==None:
+                if lindistr==None:
                     exit()
                 else:
                     subprocess.run(["sudo","shutdown","-h","now"])
