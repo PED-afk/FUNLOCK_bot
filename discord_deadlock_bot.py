@@ -184,7 +184,7 @@ BOT_ROLE=1516075439347470437
 BOTS_CHANNEL_ID = 1515333724269445270
 
 
-# Set up the bot with a command prefix
+#Set up the bot with a command prefix
 intents = discord.Intents.default()
 intents.messages = True
 intents.message_content = True
@@ -491,7 +491,7 @@ async def bot_help(ctx, section:str=None):
         elif section=="admin":
             anyView=False
             botcommands=[
-                "`!Ping`: I will send 'Pong!' if I'm alive.",
+                "`!ping`: I will send 'Pong!' if I'm alive.",
                 "`!status`: My version, OS and hardware I run on.",
                 "`!sleep`: I will sleep until a certain hour to save on energy and hardware integrity. (the bot is unavailable during sleep but will automatically start at* the designated hour)"
                 "`!restart:` or `!reload`: I will restart and apply changes to my code.",
@@ -528,12 +528,12 @@ async def bot_help(ctx, section:str=None):
                 await ctx.reply('\n'.join(botcommands))
 
 @bot.command()
-async def Ping(ctx):
+async def ping(ctx):
     if ctx.channel.id==BOTS_CHANNEL_ID:
         await ctx.reply("Pong!",delete_after=2)
 
 @bot.command()
-async def Pat(ctx):
+async def pat(ctx):
     if ctx.channel.id==BOTS_CHANNEL_ID:
         await ctx.reply(chooseFaceFromCategory("pat"))
 
@@ -855,7 +855,7 @@ async def tick():
 bot.startTimers={"A":11*60,"B":11*60}
 bot.timers={"A":None,"B":None}
 bot.bootTime=time.time()//1
-bot.version="0.5.3"
+bot.version="0.5.5"
 
 
 
