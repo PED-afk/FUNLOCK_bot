@@ -1,10 +1,13 @@
 {
-    "616710497378631709": {
+    "dc id as str": {
         "main": "None",
         "steamID": "None",
         "steamID3": "None",
         "steamID64": "None",
-        "money": 0,
+        "money": {
+            "unsecured": 0,
+            "secured": 0
+        },
         "items": [],
         "lvl": 0,
         "XP": 0,
