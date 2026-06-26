@@ -1,0 +1,147 @@
+{
+    "hint":"player runs from archmother to the hidden king",
+    "before start":{
+        "nexts":["start","start"]
+    },
+    "start":{
+        "nexts":["enemy yellow base guardian","enemy blue base guardian","enemy green base guardian","yellow enemy urn pickup","green enemy urn pickup"]
+    },
+    "enemy yellow base guardian":{
+        "nexts":["yellow lane (before base guardian)","yellow enemy urn pickup"]
+    },
+    "enemy blue base guardian":{
+        "nexts":["blue enemy walker","blue lane bull"]
+    },
+    "enemy green base guardian":{
+        "nexts":["green enemy walker","blue lane bull"]
+    },
+    "yellow enemy urn pickup":{
+        "nexts":["blue enemy guardian","enemy yellow/blue sinner","alley to yellow lane"]
+    },
+    "green enemy urn pickup":{
+        "nexts":["green bridge buff","enemy green/blue sinner"]
+    },
+    "yellow lane (before base guardian)":{
+        "nexts":["yellow enemy urn pickup","yellow enemy walker","alley to yellow lane"]
+    },
+    "blue enemy walker":{
+        "nexts":["enemy yellow/blue sinner","blue enemy guardian"]
+    },
+    "blue lane bull":{
+        "nexts":["blue enemy guardian","enemy green/blue sinner"]
+    },
+    "green enemy walker":{
+        "nexts":["green enemy urn pickup","green enemy guardian","green enemy gaurdian flank"]
+    },
+    "blue enemy guardian":{
+        "nexts":["blue friendly guardian","blue enemy guardian flank"]
+    },
+    "enemy yellow/blue sinner":{
+        "nexts":["yellow bridge buff","friendly yellow/blue sinner","blue enemy guardian flank"]
+    },
+    "alley to yellow lane":{
+        "nexts":["enemy yellow sinner","yellow enemy guardian"]
+    },
+    "green bridge buff":{
+        "nexts":["friendly green sinner","friendly double sinner","friendly green/blue sinner"]
+    },
+    "enemy green/blue sinner":{
+        "nexts":["green bridge buff","blue friendly guardian flank"]
+    },
+    "yellow enemy walker":{
+        "nexts":["yellow enemy guardian","yellow enemy walker flank"]
+    },
+    "green enemy guardian":{
+        "nexts":["enemy green sinner","green friendly guardian"]
+    },
+    "green enemy gaurdian flank":{
+        "nexts":["green friendly guardian","green enemy guardian"]
+    },
+    "blue friendly guardian":{
+        "nexts":["blue lane bear","blue friendly walker"]
+    },
+    "blue enemy guardian flank":{
+        "nexts":["blue friendly guardian","friendly yellow/blue sinner"]
+    },
+    "yellow bridge buff":{
+        "nexts":["friendly yellow/blue sinner","yellow friendly urn pickup"]
+    },
+    "friendly yellow/blue sinner":{
+        "nexts":["blue lane bear","blue friendly guardian"]
+    },
+    "enemy yellow sinner":{
+        "nexts":["yellow urn pickup","yellow bridge buff"]
+    },
+    "yellow enemy guardian":{
+        "nexts":["enemy yellow sinner","yellow friendly guardian"]
+    },
+    "friendly green sinner":{
+        "nexts":["green friendly guardian","alley to green lane"]
+    },
+    "friendly double sinner":{
+        "nexts":["green friendly urn pickup","blue friendly walker"]
+    },
+    "friendly green/blue sinner":{
+        "nexts":["blue friendly walker","green friendly urn pickup"]
+    },
+    "blue friendly guardian flank":{
+        "nexts":["blue friendly guardian","friendly green/blue sinner"]
+    },
+    "yellow enemy walker flank":{
+        "nexts":["yellow enemy guardian flank","yellow enemy guardian"]
+    },
+    "enemy green sinner":{
+        "nexts":["friendly green sinner","green bridge buff"]
+    },
+    "green friendly guardian":{
+        "nexts":["green friendly walker","alley to green lane"]
+    },
+    "blue lane bear":{
+        "nexts":["friendly blue base guardian","friendly yellow base guardian"]
+    },
+    "blue friendly walker":{
+        "nexts":["friendly blue base guardian","friendly green base guardian"]
+    },
+    "yellow friendly urn pickup":{
+        "nexts":["yellow friendly walker","blue lane bear","friendly yellow base guardian"]
+    },
+    "yellow urn pickup":{
+        "nexts":["yellow friendly guardian","friendly yellow sinner"]
+    },
+    "yellow friendly guardian":{
+        "nexts":["yellow friendly walker","yellow friendly urn pickup"]
+    },
+    "alley to green lane":{
+        "nexts":["green friendly urn pickup","friendly green base guardian"]
+    },
+    "green friendly urn pickup":{
+        "nexts":["friendly green base guardian","friendly blue base guardian"]
+    },
+    "yellow enemy guardian flank":{
+        "nexts":["yellow enemy guardian","yellow friendly guardian"]
+    },
+    "green friendly walker":{
+        "nexts":["friendly green base guardian","green friendly walker flank"]
+    },
+    "green friendly walker flank":{
+        "nexts":["friendly green base guardian","friendly green base guardian"]
+    },
+    "friendly blue base guardian":{
+        "nexts":["win","win"]
+    },
+    "friendly yellow base guardian":{
+        "nexts":["win","win"]
+    },
+    "friendly green base guardian":{
+        "nexts":["win","win"]
+    },
+    "yellow friendly walker":{
+        "nexts":["yellow friendly walker flank","friendly yellow base guardian"]
+    },
+    "friendly yellow sinner":{
+        "nexts":["yellow friendly guardian","yellow friendly urn pickup"]
+    },
+    "yellow friendly walker flank":{
+        "nexts":["friendly yellow base guardian","friendly yellow base guardian"]
+    }
+}
