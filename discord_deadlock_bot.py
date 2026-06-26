@@ -175,6 +175,203 @@ class FindRem(discord.ui.View):
         await interaction.message.delete()
         await interaction.response.send_message(self.buttonTexts[8]+"\n"+self.resoultEval(self.buttonTexts[8]))
 
+class runHome(discord.ui.View):
+    def __init__(self, ctx, where:str, userChar:dict):
+        super().__init__(timeout=60)#expire in 60 sec
+        self.where=where
+        self.ctx=ctx
+        self.userChar=userChar
+        
+        self.nextWheres=[]
+        if self.where=="start":
+            nexts=bot.map_graph[self.where]["nexts"]
+            self.where=nexts[random.randint(0,len(nexts)-1)]
+        
+        nexts=bot.map_graph[self.where]["nexts"].copy()
+        for i in range(2):
+            r=random.randint(0,len(nexts)-1)
+            self.nextWheres.append(nexts[r])
+            nexts.pop(r)
+        
+        global haveToRunMore
+        haveToRunMore=True
+
+        global extraMessage
+        extraMessage=None
+        global doAfterInteract
+        doAfterInteract=None
+
+        global file
+        file=[]
+        characters=bot.characters.keys()
+        for i in self.nextWheres:
+            if "win" in i:
+                haveToRunMore=False
+            elif "sinner" in i:
+                if "friendly" in i:
+                    if random.randint(0,5)==0:
+                        enemyLevel=self.userChar["Lvl"]+random.randint(-5,5)
+                        enemyHP=bot.characters["Rem"]["base_HP"]+enemyLevel*bot.characters["Rem"]["perLvl"]
+                        enemyHP*=random.uniform(0.3,1.0)
+                        file.append(discord.File(bot.sounds_folder+"/placeholder.mp3", filename=i+".mp3"))
+                        if enemyHP<=self.userChar["HP"]:
+                            extraMessage="You met a low health Rem. You got some extra souls."
+                            doAfterInteract="giveSoulMany"
+                        else:
+                            extraMessage="You met a Rem and they managed to kill you."
+                            doAfterInteract="die"
+                    elif random.randint(0,5)==0:
+                        file.append(discord.File(bot.sounds_folder+"/placeholder.mp3", filename=i+".mp3"))
+                        extraMessage="A little helper was on the sinner, you just pass by."
+                else:
+                    if random.randint(0,5)==0:
+                        file.append(discord.File(bot.sounds_folder+"/placeholder.mp3", filename=i+".mp3"))
+                        enemy=characters[random.randint(0,len(characters)-1)]
+                        enemyLevel=self.userChar["Lvl"]+random.randint(-5,5)
+                        enemyHP=bot.characters[enemy]["base_HP"]+enemyLevel*bot.characters[enemy]["perLvl"]
+                        enemyHP*=random.uniform(0.3,1.0)
+                        if enemyHP<=self.userChar["HP"]:
+                            extraMessage="You met a low health "+enemy+". You got some extra souls."
+                            doAfterInteract="giveSoulMany"
+                        else:
+                            extraMessage="You met "+enemy+" and they managed to kill you."
+                            doAfterInteract="die"
+                    elif random.randint(0,5)==0:
+                        file.append(discord.File(bot.sounds_folder+"/placeholder.mp3", filename=i+".mp3"))
+                        extraMessage="A little helper was on the sinner, you just pass by."
+            elif "enemy" in i:
+                if "guardian" in i:
+                    damage=116*random.randint(1,4)
+                    extraMessage="You took "+str(damage)+" damage from the enemy tower"
+                    doAfterInteract="damage "+str(damage)
+                elif "walker" in i:
+                    damage=125*random.randint(1,4)
+                    extraMessage="You took "+str(damage)+" damage from the enemy tower"
+                    doAfterInteract="damage "+str(damage)
+            elif "urn" in i:
+                if "enemy" in i:
+                    if random.randint(0,9)==0:
+                        file.append(discord.File(bot.sounds_folder+"/placeholder.mp3", filename=i+".mp3"))
+                        enemy=characters[random.randint(0,len(characters)-1)]
+                        enemyLevel=self.userChar["Lvl"]+random.randint(-5,5)
+                        enemyHP=bot.characters[enemy]["base_HP"]+enemyLevel*bot.characters[enemy]["perLvl"]
+                        enemyHP*=random.uniform(0.3,1.0)
+                        if enemyHP<=self.userChar["HP"]:
+                            extraMessage="You ran into a low health "+enemy+". Who was trying to take the urn. You got some extra souls."
+                            doAfterInteract="giveSoul"
+                        else:
+                            extraMessage="You met "+enemy+". Who was trying to take the urn. Unfortunatelly they managed to kill you."
+                            doAfterInteract="die"
+                else:
+                    if random.randint(0,19)==0:
+                        file.append(discord.File(bot.sounds_folder+"/placeholder.mp3", filename=i+".mp3"))
+                        enemy=characters[random.randint(0,len(characters)-1)]
+                        enemyLevel=self.userChar["Lvl"]+random.randint(-5,5)
+                        enemyHP=bot.characters[enemy]["base_HP"]+enemyLevel*bot.characters[enemy]["perLvl"]
+                        enemyHP*=random.uniform(0.3,1.0)
+                        if enemyHP<=self.userChar["HP"]:
+                            extraMessage="You ran into a low health "+enemy+". Who was trying to steal the urn. You got some extra souls."
+                            doAfterInteract="giveSoul"
+                        else:
+                            extraMessage="You met "+enemy+". Who was trying to steal the urn. Unfortunatelly they managed to kill you."
+                            doAfterInteract="die"
+
+
+
+        self.button1.label=self.nextWheres[0]
+        self.button2.label=self.nextWheres[1]
+
+    async def interaction_check(self, interaction: discord.Interaction):
+        if interaction.user.id!=self.author.id:
+            await interaction.response.send_message("You can't use these buttons.",ephemeral=True,delete_after=5)
+            return False
+        return True
+
+    @discord.ui.button(label="1", style=discord.ButtonStyle.primary,row=0)
+    async def button1(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.message.delete()
+        global extraMessage
+        global doAfterInteract
+        global haveToRunMore
+        alive=True
+        if doAfterInteract=="giveSoul":
+            bot.user_data[str(self.ctx.author.id)]["money"]["unsecured"]+=random.randint(3,6)*100
+        elif doAfterInteract=="giveSoulMany":
+            bot.user_data[str(self.ctx.author.id)]["money"]["unsecured"]+=random.randint(3,12)*100
+        elif doAfterInteract=="die":
+            moneyLost=bot.user_data[str(self.ctx.author.id)]["money"]["unsecured"]
+            bot.user_data[str(self.ctx.author.id)]["money"]["unsecured"]=0
+            await interaction.response.send_message(extraMessage+"\nYou lost "+moneyLost+" unsecured souls")
+            haveToRunMore=False
+            alive=False
+        elif "damage" in doAfterInteract:
+            self.userChar["HP"]-=int(doAfterInteract.split(" ")[-1])
+            if self.userChar["HP"]<=0:
+                haveToRunMore=False
+                alive=False
+                moneyLost=bot.user_data[str(self.ctx.author.id)]["money"]["unsecured"]
+                bot.user_data[str(self.ctx.author.id)]["money"]["unsecured"]=0
+                await interaction.response.send_message(extraMessage+"\nYou died to the tower and lost "+moneyLost+" unsecured souls")
+
+        if haveToRunMore:
+            if extraMessage==None:
+                message="Your position: "+self.where+"\n:heart:: "+self.userChar["HP"]+"/"+self.userChar["maxHP"]
+            else:
+                message=extraMessage+"\nYour position: "+self.where+"\n:heart:: "+self.userChar["HP"]+"/"+self.userChar["maxHP"]
+            global file
+            if len(file)!=0:
+                await interaction.response.send_message(message,view=runHome(self.ctx,self.nextWheres[0],self.userChar),files=file)
+            else:
+                await interaction.response.send_message(message,view=runHome(self.ctx,self.nextWheres[0],self.userChar))
+        elif alive:
+            await interaction.response.send_message("You got back to your base, and secured your souls.")
+            userID=str(self.ctx.author.id)
+            bot.user_data[userID]["money"]["secured"]+=bot.user_data[userID]["money"]["unsecured"]
+            bot.user_data[userID]["money"]["unsecured"]=0
+            
+    @discord.ui.button(label="2", style=discord.ButtonStyle.primary,row=0)
+    async def button2(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.message.delete()
+        global extraMessage
+        global doAfterInteract
+        global haveToRunMore
+        alive=True
+        if doAfterInteract=="giveSoul":
+            bot.user_data[str(self.ctx.author.id)]["money"]["unsecured"]+=random.randint(3,6)*100
+        elif doAfterInteract=="giveSoulMany":
+            bot.user_data[str(self.ctx.author.id)]["money"]["unsecured"]+=random.randint(3,12)*100
+        elif doAfterInteract=="die":
+            moneyLost=bot.user_data[str(self.ctx.author.id)]["money"]["unsecured"]
+            bot.user_data[str(self.ctx.author.id)]["money"]["unsecured"]=0
+            await interaction.response.send_message(extraMessage+"\nYou lost "+moneyLost+" unsecured souls")
+            haveToRunMore=False
+            alive=False
+        elif "damage" in doAfterInteract:
+            self.userChar["HP"]-=int(doAfterInteract.split(" ")[-1])
+            if self.userChar["HP"]<=0:
+                haveToRunMore=False
+                alive=False
+                moneyLost=bot.user_data[str(self.ctx.author.id)]["money"]["unsecured"]
+                bot.user_data[str(self.ctx.author.id)]["money"]["unsecured"]=0
+                await interaction.response.send_message(extraMessage+"\nYou died to the tower and lost "+moneyLost+" unsecured souls")
+
+        if haveToRunMore:
+            if extraMessage==None:
+                message="Your position: "+self.where+"\n:heart:: "+self.userChar["HP"]+"/"+self.userChar["maxHP"]
+            else:
+                message=extraMessage+"\nYour position: "+self.where+"\n:heart:: "+self.userChar["HP"]+"/"+self.userChar["maxHP"]
+            global file
+            if len(file)!=0:
+                await interaction.response.send_message(message,view=runHome(self.ctx,self.nextWheres[1],self.userChar),files=file)
+            else:
+                await interaction.response.send_message(message,view=runHome(self.ctx,self.nextWheres[1],self.userChar))
+        elif alive:
+            await interaction.response.send_message("You got back to your base, and secured your souls.")
+            userID=str(self.ctx.author.id)
+            bot.user_data[userID]["money"]["secured"]+=bot.user_data[userID]["money"]["unsecured"]
+            bot.user_data[userID]["money"]["unsecured"]=0
+
+
 
 #users
 ME=616710497378631709
@@ -262,10 +459,12 @@ async def on_message(message):
         bot.user_data[idSTR]["money"]["unsecured"]=0
         bot.user_data[idSTR]["money"]["secured"]=0
         bot.user_data[idSTR]["items"]=[]
-        bot.user_data[idSTR]["lvl"]=0
+        bot.user_data[idSTR]["lvl"]=1
         bot.user_data[idSTR]["XP"]=0
+        bot.user_data[idSTR]["wins"]=0
         bot.user_data[idSTR]["hidden"]={}
         bot.user_data[idSTR]["hidden"]["messageCD"]=0
+        bot.user_data[idSTR]["rank"]="None"
     else:
         if message.content[0]!="!" and time.time()>=bot.user_data[idSTR]["hidden"]["messageCD"]:
             bot.user_data[idSTR]["hidden"]["messageCD"]=time.time()+bot.messageCD
@@ -292,9 +491,10 @@ async def on_message(message):
             bot.user_data[idSTR]["money"]["unsecured"]+=100+random.randint(0,lenght)*bonusM
             bot.user_data[idSTR]["XP"]+=1+random.randint(0,lenght)*bonusM
             level=bot.user_data[idSTR]["lvl"]
-            if bot.user_data[idSTR]["XP"]>=100+2**(level/4)+level:
-                bot.user_data[idSTR]["XP"]-=100+2**(level/4)+level
-                bot.user_data[idSTR]["lvl"]+=1
+            if level<bot.maxLevel:
+                if bot.user_data[idSTR]["XP"]>=100+2**(level/4)+level:
+                    bot.user_data[idSTR]["XP"]-=100+2**(level/4)+level
+                    bot.user_data[idSTR]["lvl"]+=1
     
     await bot.process_commands(message)
 
@@ -317,12 +517,26 @@ async def minigames(ctx, game:str=None):
         if game==None:
             games=[
                 "`!minigames find_Rem`: Try to find the enemy Rem and stop them from getting the sinners.",
+                "`!minigames run_home`: Try to go back to your base to secure your unsecured souls. (can only use if you have unsecured souls: `!my_data`)"
             ]
             await ctx.reply('\n'.join(games))
         elif game=="find_Rem":
-            view = FindRem(ctx)
+            view=FindRem(ctx)
             print(view.buttonTexts)
             await ctx.reply("Find the enemy Rem:", view=view)
+        elif game=="run_home_not_done":
+            if bot.user_data[str(senderID)]["main"]=="None":
+                await ctx.reply("You need to set a main first using `!set_main` in order to play this minigame")
+            else:
+                userData={
+                    "maxHP":bot.characters[bot.user_data[str(senderID)]["main"]]["base_HP"]+bot.user_data[str(senderID)]["lvl"]*bot.characters[bot.user_data[str(senderID)]]["perLvl"],
+                    "HP":bot.characters[bot.user_data[str(senderID)]["main"]]["base_HP"]+bot.user_data[str(senderID)]["lvl"]*bot.characters[bot.user_data[str(senderID)]]["perLvl"],
+                    "Lvl":bot.user_data[str(senderID)]["lvl"]
+                }
+                view=runHome(ctx,"start",userData)
+                await ctx.reply("Get back to the base!\nYou have: "+str(bot.user_data[senderID]["money"]["unsecured"])+" unsecured souls!", view=view)
+        else:
+            await ctx.reply("No minigame exists with that name."+chooseFaceFromCategory("nervous"))
 
 @bot.command()
 async def start(ctx):
@@ -496,7 +710,8 @@ async def bot_help(ctx, section:str=None):
                 "`!sleep`: I will sleep until a certain hour to save on energy and hardware integrity. (the bot is unavailable during sleep but will automatically start at* the designated hour)"
                 "`!restart:` or `!reload`: I will restart and apply changes to my code.",
                 "`!clear_loaded`: I forget stuff so I don't save incorrect data.",
-                "`!shutdown`: Kill me :("
+                "`!clear_user_data`: Clears user_data.json",
+                "`!shutdown`: This kills me :("
             ]
         elif section=="data":
             anyView=True
@@ -504,6 +719,7 @@ async def bot_help(ctx, section:str=None):
                 "Some data collection for now, maybe roles or nicknames later?\n(Also steamid for lane assign logic if there ever be a way for it.)",
                 "`!set_main`: Set this to your most played character so others can know.",
                 "`!set_steam_id`: Add your steam id to the \"database\"",
+                "`!set_rank`: Set your ingame rank so others can find.",
                 "`!my_data`: I will tell you what data I have on you.",
                 "`!remove_me`: I will remove your data from the \"database\"",
                 "`!save`: Save from variable to a file. (will save automaticaly on shutdown and restart)",
@@ -517,7 +733,8 @@ async def bot_help(ctx, section:str=None):
         elif section=="tools":
             anyView=True
             botcommands=[
-                "`!rand X Y`: All sorts of randomly given stuff. (use `!rand` to learn more)"
+                "`!rand X Y`: All sorts of randomly given stuff. (use `!rand` to learn more)",
+                "`!people_at_rank <rank> <radius> <online>`: Give you the names of people who have ranks around `<rank>`(±`<radius>` (if present)). If `<online>` is present and is set to `1`, will only search from people currently online. If `<rank>` is omited I will use your rank as base."
             ]
         else:
             await ctx.reply("No command 'folder' exist with that name.")
@@ -620,7 +837,7 @@ async def set_main(ctx,main:str):
     senderID=ctx.author.id
     if ctx.channel.id==BOTS_CHANNEL_ID:
         character=bot.characters
-        if main in character:
+        if main in character.keys():
             bot.user_data[str(senderID)]["main"]=main
             await ctx.reply("You set your main to: "+main)
         else:
@@ -639,35 +856,29 @@ async def my_data(ctx):
     if ctx.channel.id==BOTS_CHANNEL_ID:
         message=""
         for i, (key,data) in enumerate(bot.user_data[str(senderID)].items()):
+            print(key, data)
             if key=="hidden":
-                break
+                continue
             if key=="items" and len(data)==0:
-                break
+                continue
             if key=="steamID3" or key=="steamID64":
-                break
+                continue
+            if key=="rank" and data=="None":
+                continue
             if isinstance(data,dict):
                 inData=""
-                for j, (innerKey,innerData) in enumerate(data.keys()):
-                    inData+=innerKey+": "+innerData+"\n"
-                message+=key+":\n\t"+inData+"\n"
+                for j, (innerKey,innerData) in enumerate(data.items()):
+                    inData+="\t"+innerKey+": "+str(innerData)+"\n"
+                message+=key+":\n"+inData+"\n"
             else:
-                message+=key+": "+data+"\n"
-        await ctx.reply(message,delete_after=10)
+                message+=key+": "+str(data)+"\n"
+        await ctx.reply(message,delete_after=30)
         
 @bot.command()
 async def remove_me(ctx):
     senderID=ctx.author.id
     if ctx.channel.id==BOTS_CHANNEL_ID:
-        bot.user_data[str(senderID)]={
-            "main":"None",
-            "steamID":"None",
-            "steamID3":"None",
-            "steamID64":"None",
-            "money":{"unsecured":0,"secured":0},
-            "items":[],
-            "lvl":0,
-            "XP":0
-        }
+        bot.user_data.pop(str(senderID),None)
         if random.randint(0,1)==0:
             face=chooseFaceFromCategory("nervous")
         else:
@@ -688,6 +899,15 @@ async def clear_loaded(ctx):
     if ctx.channel.id==BOTS_CHANNEL_ID:
         if senderID==ME:
             bot.user_data={}
+    await ctx.reply("I forgor. Head empty...\n"+chooseFaceFromCategory("big_eyes"))
+
+@bot.command()
+async def clear_user_data(ctx):
+    senderID=ctx.author.id
+    if ctx.channel.id==BOTS_CHANNEL_ID:
+        if senderID==ME:
+            bot.user_data={}
+            save_json(bot.user_data_path,{})
     await ctx.reply("I forgor. Head empty...\n"+chooseFaceFromCategory("big_eyes"))
 
 @bot.command()
@@ -816,7 +1036,51 @@ async def rand(ctx,sub:str=None, num:int=1):
         else:
             await ctx.reply("I can't give you a random thing in that category."+chooseFaceFromCategory("nervous"))
 
+@bot.command()
+async def set_rank(ctx,rank:str=None):
+    senderID=ctx.author.id
+    if ctx.channel.id==BOTS_CHANNEL_ID:
+        if rank==None:
+            await ctx.reply("Please provide a rank.")
+        else:
+            rank=rank.lower()
+            if rank in bot.ranks.keys():
+                bot.user_data[str(senderID)]["rank"]=rank
+                await ctx.reply("Your rank has been set to: "+rank)
+            else:
+                await ctx.reply("The rank you want to set does not exist.")
 
+@bot.command()
+async def people_at_rank(ctx,rank:str=None,r:int=0,online:int=0):
+    r=abs(r)
+    senderID=ctx.author.id
+    if ctx.channel.id==BOTS_CHANNEL_ID:
+        if rank==None:
+            rank=bot.user_data[str(senderID)]["rank"]
+            if rank=="None":
+                await ctx.reply("I can't use your rank as a base, because you haven't set your rank yet.")
+                return
+        base=list(bot.ranks.keys()).index(rank)
+        lookedForRanks=list(bot.ranks.keys())[max(0,base-r):min(base+r,len(list(bot.ranks.keys()))-1)]
+        lookedForPeople=[]
+        for i,(key,value) in enumerate(bot.user_data.items()):
+            if key==str(senderID):
+                continue
+            if value["rank"] in lookedForRanks:
+                if online:
+                    for guild in bot.guilds:
+                        member = guild.get_member(int(key))
+                        if member:
+                            if member.status!=discord.Status.online:
+                                continue
+                lookedForPeople.append((await bot.fetch_user(int(key))).display_name+": "+value["rank"])
+        if len(lookedForPeople)!=0:
+            await ctx.reply("These people have rank simmilar to what you are looking for:\n"+'\n'.join(lookedForPeople))
+        else:
+            if online:
+                await ctx.reply("No online people are in that rank. "+chooseFaceFromCategory("sad"))
+            else:
+                await ctx.reply("No people found. "+chooseFaceFromCategory("sad"))
 
 
 @tasks.loop(seconds=1)
@@ -855,7 +1119,7 @@ async def tick():
 bot.startTimers={"A":11*60,"B":11*60}
 bot.timers={"A":None,"B":None}
 bot.bootTime=time.time()//1
-bot.version="0.5.5"
+bot.version="0.5.6"
 
 
 
@@ -868,16 +1132,26 @@ bot.user_data_path = BASE / "user_data.json"
 bot.pause_file = BASE / "pauseTimes.txt"
 
 bot.characters_file = BASE / "characters.txt"
+bot.characters_file_json = BASE / "characters.json"
 bot.items_file = BASE / "items.txt"
+bot.map_graph_file = BASE / "map_graph.json"
 
 bot.face_file = BASE / "faces.json"
+bot.ranks_file=BASE / "ranks.json"
+
+bot.sounds_folder=BASE / "sounds"
 
 bot.faces=load_json(bot.face_file)
 bot.user_data=load_json(bot.user_data_path)
 
 bot.characters=load_txt(bot.characters_file)
+bot.characters=load_json(bot.characters_file_json)
+bot.maxLevel=bot.characters[list(bot.characters.keys())[0]]["maxLvl"]
 
 bot.items=loadItemsProper(load_txt(bot.items_file))
+bot.map_graph=load_json(bot.map_graph_file)
+
+bot.ranks=load_json(bot.ranks_file)
 
 load_dotenv()
 bot.run(os.getenv("DISCORD_TOKEN"))
